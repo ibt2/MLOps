@@ -45,21 +45,16 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            # PARAMÈTRES DÉFINIS VIA CLI POUR ÉVITER D'UTILISER sonar-project.properties
             -Dsonar.projectKey=ibt2_MLOps
             -Dsonar.organization=ibt2
             -Dsonar.projectName=MLOps
-            # Analyse tout le code dans le dépôt
             -Dsonar.sources=backend,ui
             -Dsonar.sourceEncoding=UTF-8
             
-            # Exclusion pour l'analyse générale (très bien défini)
             -Dsonar.exclusions=**/node_modules/**,**/__pycache__/**,**/.git/**,**/.venv/**,**/*.pkl,backend/models/**,backend/data/**,**/*.csv,*.pkl
             
-            # Fichiers de couverture générés à l'étape précédente
             -Dsonar.python.coverage.reportPaths=backend/coverage.xml
             
-            # Assurez-vous que le scanner ne signale pas les fichiers de tests comme "non couverts"
             -Dsonar.test.exclusions=**/tests/**,**/*test*.py 
             
             -Dsonar.python.version=3.11

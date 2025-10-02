@@ -1,0 +1,15 @@
+FROM python:3.11-slim
+WORKDIR /app
+
+# Copie TOUT le contenu du dossier ui/ dans /app
+COPY . /app
+
+# Installe les dépendances à partir du fichier déjà copié
+RUN pip install --no-cache-dir -r requirements-ui.txt
+
+# L’UI doit joindre ton backend local (depuis un conteneur Windows/Mac)
+ENV API_URL=http://host.docker.internal:8000
+
+EXPOSE 8501
+# ⚠️ Si ton fichier principal n’est pas app.py, remplace-le ici
+CMD ["streamlit","run","app.py","--server.address","0.0.0.0","--server.port","8501"]

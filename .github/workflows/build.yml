@@ -29,20 +29,17 @@ jobs:
 
       - name: Install dependencies and test tools
         run: |
+        
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
-          # On installe dans le path, pas besoin de cd
           pip install pytest pytest-cov
 
       - name: Run tests (backend) + coverage
         run: |
           cd backend
-          # --cov=src et --cov=api sont mieux que --cov=backend.src, car on est dans le dossier 'backend'
           PYTHONPATH=. pytest -q --maxfail=1 --disable-warnings \
             --cov=src --cov=api --cov-report=xml:coverage.xml
-          # Échec si coverage.xml n'est pas créé
           test -f coverage.xml || (echo "coverage.xml manquant" && exit 1)
-          # On remonte à la racine
           cd ..
           
       - name: Show coverage file

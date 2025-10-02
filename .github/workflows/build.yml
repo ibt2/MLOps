@@ -44,7 +44,6 @@ jobs:
           
           if [ ! -f "$REPORT_PATH" ]; then
             echo "Avertissement : Le fichier de couverture ($REPORT_PATH) n'a pas été trouvé. Création d'un rapport XML minimaliste pour éviter l'erreur SonarCloud."
-            # Création d'un rapport XML valide avec 0% de couverture
             echo '<?xml version="1.0" encoding="utf-8"?><coverage line-rate="0" branch-rate="0" lines-covered="0" lines-valid="0" branches-covered="0" branches-valid="0" complexity="0" version="7.5.0"></coverage>' > "$REPORT_PATH"
           else
             echo "Le fichier de couverture ($REPORT_PATH) a été créé. Poursuite du scan."

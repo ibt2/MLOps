@@ -31,42 +31,27 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
+          # On installe dans le path, pas besoin de cd
           pip install pytest pytest-cov
 
       - name: Run tests (backend) + coverage
         run: |
-           pytest backend -q --maxfail=1 --disable-warnings \
-            --cov=backend.api --cov=backend.src --cov-report=xml:backend/coverage.xml || true
-            
-      - name: Verify and Ensure Coverage Report Exists
-        run: |
-          REPORT_PATH="backend/coverage.xml"
+          cd backend
+          # --cov=src et --cov=api sont mieux que --cov=backend.src, car on est dans le dossier 'backend'
+          PYTHONPATH=. pytest -q --maxfail=1 --disable-warnings \
+            --cov=src --cov=api --cov-report=xml:coverage.xml
+          # Échec si coverage.xml n'est pas créé
+          test -f coverage.xml || (echo "coverage.xml manquant" && exit 1)
+          # On remonte à la racine
+          cd ..
           
-          if [ ! -f "$REPORT_PATH" ]; then
-            echo "Avertissement : Le fichier de couverture ($REPORT_PATH) n'a pas été trouvé. Création d'un rapport XML minimaliste pour éviter l'erreur SonarCloud."
-            echo '<?xml version="1.0" encoding="utf-8"?><coverage line-rate="0" branch-rate="0" lines-covered="0" lines-valid="0" branches-covered="0" branches-valid="0" complexity="0" version="7.5.0"></coverage>' > "$REPORT_PATH"
-          else
-            echo "Le fichier de couverture ($REPORT_PATH) a été créé. Poursuite du scan."
-          fi
+      - name: Show coverage file
+        run: ls -l backend/coverage.xml && head -n 20 backend/coverage.xml
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.projectKey=ibt2_MLOps
-            -Dsonar.organization=ibt2
-            -Dsonar.projectName=MLOps
-            -Dsonar.sources=backend,ui
-            -Dsonar.sourceEncoding=UTF-8
-            
-            -Dsonar.exclusions=**/node_modules/**,**/__pycache__/**,**/.git/**,**/.venv/**,**/*.pkl,backend/models/**,backend/data/**,**/*.csv,*.pkl
-            
-            -Dsonar.python.coverage.reportPaths=backend/coverage.xml
-            
-            -Dsonar.test.exclusions=**/tests/**,**/*test*.py
-            -Dsonar.python.version=3.11
 
       - name: SonarCloud Quality Gate (PR only)
         if: github.event_name == 'pull_request'
